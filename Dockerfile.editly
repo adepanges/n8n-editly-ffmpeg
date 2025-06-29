@@ -1,0 +1,36 @@
+FROM editly/editly:master
+
+RUN apt-get update && apt-get install -y \
+    xvfb \
+    x11-xserver-utils \
+    xfonts-base \
+    xfonts-75dpi \
+    xfonts-scalable \
+    dumb-init \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV DISPLAY=:99
+
+# Rename original binary
+RUN mv /usr/local/bin/editly /usr/local/bin/editly-bin
+
+# Create logging wrapper for editly
+RUN echo '#!/bin/sh' > /usr/local/bin/editly && \
+    echo 'echo "[editly] Job started: $(date)"' >> /usr/local/bin/editly && \
+    echo 'echo "[editly] Command: editly-bin $@"' >> /usr/local/bin/editly && \
+    echo 'editly-bin "$@" 2>&1 | tee -a /var/log/editly.log' >> /usr/local/bin/editly && \
+    echo 'echo "[editly] Job ended: $(date)\n"' >> /usr/local/bin/editly && \
+    chmod +x /usr/local/bin/editly
+
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
+CMD ["sh", "-c", "\
+    rm -f /tmp/.X99-lock && \
+    mkdir -p /var/log && \
+    echo '[editly] Log started on: ' $(date) > /var/log/editly.log && \
+    echo '===============================' >> /var/log/editly.log && \
+    echo '[editly] SERVICE READY' >> /var/log/editly.log && \
+    echo '===============================' >> /var/log/editly.log && \
+    Xvfb :99 -screen 0 1280x1024x24 -ac +extension GLX +render -noreset & \
+    sleep 2 && \
+    tail -n+1 -F /var/log/editly.log"]
