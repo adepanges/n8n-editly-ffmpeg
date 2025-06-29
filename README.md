@@ -56,6 +56,31 @@ docker-compose stop
   - Used for queue management
   - Data persisted in redis_storage volume
 
+## Usage Examples
+
+### Using Editly via Docker
+
+1. For JSON files with relative paths:
+```bash
+docker exec editly sh -c "cd /var/data/editly/examples/ && editly audio1.json5 --out /var/data/audio1.mp4"
+```
+
+2. For JSON files with absolute paths:
+```bash
+docker exec editly editly /var/data/editly/examples/audio1.json5 --out /var/data/audio1.mp4
+```
+
+Note: Output files will be saved to the mounted ./data directory on host
+
+3. Using Editly from n8n Execute Command node:
+```json
+{
+  "command": "docker exec editly editly /var/data/editly/examples/{{your-file}}.json5 --out /var/data/{{output-file}}.mp4",
+  "parameters": {}
+}
+```
+<!-- Image placeholder for n8n workflow will be added here -->
+
 ## Security Considerations
 - Docker socket mounting gives containers full host control
 - All services run as root user
