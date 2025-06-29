@@ -1,0 +1,108 @@
+version: '3'
+
+volumes:
+  db_storage:
+  n8n_storage:
+  redis_storage:
+
+x-shared: &shared
+  restart: always
+  build:
+    context: .
+    dockerfile: Dockerfile.n8n
+  environment:
+    - DB_TYPE=postgresdb
+    - DB_POSTGRESDB_HOST=postgres
+    - DB_POSTGRESDB_PORT=5432
+    - DB_POSTGRESDB_DATABASE=${POSTGRES_DB}
+    - DB_POSTGRESDB_USER=${POSTGRES_NON_ROOT_USER}
+    - DB_POSTGRESDB_PASSWORD=${POSTGRES_NON_ROOT_PASSWORD}
+    - EXECUTIONS_MODE=queue
+    - QUEUE_BULL_REDIS_HOST=redis
+    - QUEUE_HEALTH_CHECK_ACTIVE=true
+    - N8N_ENCRYPTION_KEY=${ENCRYPTION_KEY}
+    - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+    - OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS=true
+    - N8N_RUNNERS_ENABLED=${N8N_RUNNERS_ENABLED:-true}
+    - N8N_LICENSE_ACTIVATION_KEY=${N8N_LICENSE_ACTIVATION_KEY:-}
+    - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+    - GENERIC_TIMEZONE=Asia/Jakarta
+    - EXECUTIONS_DATA_PRUNE=true
+    - EXECUTIONS_DATA_MAX_AGE=24
+    - EXECUTIONS_DATA_PRUNE_MAX_COUNT=10000
+    - N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true
+    - NODE_FUNCTION_ALLOW_EXTERNAL=@ffmpeg-installer/ffmpeg,fluent-ffmpeg,path,fs,editly,gl
+  links:
+    - postgres
+    - redis
+  volumes:
+    - n8n_storage:/home/node/.n8n
+    - ./data:/var/data
+  depends_on:
+    redis:
+      condition: service_healthy
+    postgres:
+      condition: service_healthy
+    browserless:
+      condition: service_started
+  healthcheck:
+    test: ["CMD-SHELL", "/usr/bin/wget --server-response --proxy off --no-verbose --tries=1 --timeout=3 localhost:5678/healthz -O /dev/null 2>&1 | grep -q 'HTTP/1.1 200 OK'"]
+    interval: 20s
+    retries: 3
+
+services:
+  postgres:
+    image: postgres:16
+    restart: always
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+      - POSTGRES_NON_ROOT_USER
+      - POSTGRES_NON_ROOT_PASSWORD
+    volumes:
+      - db_storage:/var/lib/postgresql/data
+      - ./init-data.sh:/docker-entrypoint-initdb.d/init-data.sh
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -h localhost -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:6-alpine
+    restart: always
+    volumes:
+      - redis_storage:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  n8n:
+    <<: *shared
+    ports:
+      - 5678:5678
+
+  n8n-worker:
+    <<: *shared
+    command: worker
+    depends_on:
+      - n8n
+
+  browserless:
+    image: ghcr.io/browserless/chromium
+    container_name: browserless
+    restart: unless-stopped
+    ports:
+      - "1000:3000"
+    environment:
+      - CONCURRENT=10
+      - TOKEN=sapidelman
+    networks:
+      - n8n-network
+
+networks:
+  n8n-network:
+    driver: bridge

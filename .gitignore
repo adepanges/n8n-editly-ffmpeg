@@ -1,0 +1,5 @@
+.env
+.claw.env
+data/*
+
+!data/readme.md
