@@ -1,4 +1,4 @@
-# n8n with PostgreSQL and Worker
+# n8n with Worker, PostgreSQL, Redis, Editly and FFmpeg
 
 Starts n8n with PostgreSQL as database, and the Worker as a separate container.
 
