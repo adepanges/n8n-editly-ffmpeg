@@ -79,7 +79,8 @@ Note: Output files will be saved to the mounted ./data directory on host
   "parameters": {}
 }
 ```
-<!-- Image placeholder for n8n workflow will be added here -->
+![image](https://github.com/user-attachments/assets/2d6a807e-0a88-4a43-ab9e-3b77b2cab5b5)
+
 
 ## Security Considerations
 - Docker socket mounting gives containers full host control
