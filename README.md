@@ -67,7 +67,7 @@ docker exec editly sh -c "cd /var/data/editly/examples/ && editly audio1.json5 -
 
 2. For JSON files with absolute paths:
 ```bash
-docker exec editly editly /var/data/editly/examples/audio1.json5 --out /var/data/audio1.mp4
+docker exec editly sh -c "editly /var/data/editly/examples/audio1.json5 --out /var/data/audio1.mp4"
 ```
 
 Note: Output files will be saved to the mounted ./data directory on host
@@ -75,7 +75,7 @@ Note: Output files will be saved to the mounted ./data directory on host
 3. Using Editly from n8n Execute Command node:
 ```json
 {
-  "command": "docker exec editly editly /var/data/editly/examples/{{your-file}}.json5 --out /var/data/{{output-file}}.mp4",
+  "command": "docker exec editly sh -c \"cd /var/data/editly/examples/ && editly audio1.json5 --out /var/data/audio1.mp4\"",
   "parameters": {}
 }
 ```

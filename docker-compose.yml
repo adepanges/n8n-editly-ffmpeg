@@ -83,11 +83,13 @@ services:
 
   n8n:
     <<: *shared
+    container_name: n8n-instance-1
     ports:
       - 5678:5678
 
   n8n-worker:
     <<: *shared
+    container_name: n8n-worker-1
     command: worker
     depends_on:
       - n8n
@@ -99,8 +101,8 @@ services:
     ports:
       - "1000:3000"
     environment:
-      - CONCURRENT=10
-      - TOKEN=sapidelman
+      - CONCURRENT=${BROWSERLESS_CONCURRENT:-10}
+      - TOKEN=${BROWSERLESS_TOKEN:-empty}
     networks:
       - n8n-network
 

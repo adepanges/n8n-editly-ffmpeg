@@ -1,5 +1,6 @@
 .env
 .claw.env
 data/*
+waha/
 
 !data/readme.md
