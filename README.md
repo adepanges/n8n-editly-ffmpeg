@@ -20,6 +20,11 @@ To start all services:
 docker-compose up -d
 ```
 
+If any version of image is changed, you must rebuild the images:
+```bash
+docker-compose up --build -d
+```
+
 To stop:
 ```bash
 docker-compose stop
