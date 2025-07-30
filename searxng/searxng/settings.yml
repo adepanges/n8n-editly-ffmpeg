@@ -1,0 +1,53 @@
+# see https://docs.searxng.org/admin/settings/settings.html#settings-use-default-settings
+use_default_settings: true
+server:
+  # base_url is defined in the SEARXNG_BASE_URL environment variable, see .env and docker-compose.yml
+  secret_key: "sapidelman"  # change this!
+  limiter: false  # enable this when running the instance for a public usage on the internet
+  image_proxy: true
+search:
+  # formats: [html, csv, json, rss]
+  formats:
+    - html
+    - json
+    - csv
+    - rss
+
+ui:
+  static_use_hash: true
+valkey:
+  url: redis://redis:6379/0
+
+plugins:
+  searx.plugins.hostnames.SXNGPlugin:
+    active: true
+
+enabled_plugins:
+  - 'Hostnames plugin'
+
+hostnames:
+  remove:
+    - '(.*\.)?facebook\.com$'
+    - '(.*\.)?instagram\.com$'
+    - '(.*\.)?twitter\.com$'
+    - '(.*\.)?x\.com$'
+    - '(.*\.)?linkedin\.com$'
+    - '(.*\.)?medium\.com$'
+    - '(.*\.)?quora\.com$'
+    - '(.*\.)?pinterest\.com$'
+    - '(.*\.)?reddit\.com$'
+    - '(.*\.)?tiktok\.com$'
+    - '(.*\.)?youtube\.com$'
+    - '(.*\.)?vimeo\.com$'
+    - '(.*\.)?flickr\.com$'
+    - '(.*\.)?tumblr\.com$'
+    - '(.*\.)?wikipedia\.org$'
+    - '(.*\.)?wikipedia\.com$'
+    - '(.*\.)?github\.com$'
+    - '(.*\.)?gitlab\.com$'
+    - '(.*\.)?bitbucket\.org$'
+    - '(.*\.)?stackoverflow\.com$'
+    - '(.*\.)?stackexchange\.com$'
+    - '(.*\.)?wordpress\.com$'
+    - '(.*\.)?blogger\.com$'
+    - '(.*\.)?shutterstock\.com$'
