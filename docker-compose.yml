@@ -114,6 +114,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./data:/var/data
+    cpus: 5.0
 
 networks:
   n8n-network:
